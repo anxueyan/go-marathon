@@ -166,7 +166,15 @@ func (r *marathonClient) registerSSESubscription() error {
 	url := fmt.Sprintf("%s/%s", marathon, marathonAPIEventStream)
 
 	// Try to connect to stream
-	stream, err := eventsource.Subscribe(url, "")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	if r.config.HTTPBasicAuthUser != "" {
+		req.SetBasicAuth(r.config.HTTPBasicAuthUser, r.config.HTTPBasicPassword)
+	}
+
+	stream, err := eventsource.SubscribeWithRequest("", req)
 	if err != nil {
 		return err
 	}
